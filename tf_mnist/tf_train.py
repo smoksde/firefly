@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tf_model import create_model
+from tf_mnist.tf_model import create_model
 import matplotlib
 
 matplotlib.use("Agg")
