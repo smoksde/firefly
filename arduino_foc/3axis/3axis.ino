@@ -29,6 +29,9 @@ void setup() {
   Wire.begin(21, 22);      // Bus 0 for Sensor 1
   Wire1.begin(19, 18);     // Bus 1 for Sensor 2
 
+  Wire.setClock(800000);  // Boost Bus 0 to 800kHz
+  Wire1.setClock(800000); // Boost Bus 1 to 800kHz
+
   motor1.useMonitoring(Serial);
   motor2.useMonitoring(Serial);
 
