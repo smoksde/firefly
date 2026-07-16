@@ -32,8 +32,8 @@ void setup() {
   motor.linkDriver(&driver);
 
   // Default closed-loop safety limits for normal operations
-  motor.voltage_limit = 0.5;         
-  motor.voltage_sensor_align = 0.5;  
+  motor.voltage_limit = 1.0;         
+  motor.voltage_sensor_align = 1.0;  
   motor.velocity_limit = 10.0;       
   motor.controller = MotionControlType::angle;
 

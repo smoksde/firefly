@@ -54,6 +54,13 @@ def main():
         df[col] = pd.to_numeric(df[col], errors="coerce")
     df = df.dropna()
 
+    # --- Vorzeichen-Korrektur für Motor 2 ---
+    # Falls der Ist-Winkel physikalisch invertiert gemessen wird:
+    df["angle2"] = -df["angle2"]
+    df["vel2"] = -df[
+        "vel2"
+    ]  # Auch die Geschwindigkeit spiegeln, damit es konsistent bleibt
+
     # 2. Pre-process timestamps to relative seconds
     df["time_s"] = (df["time_ms"] - df["time_ms"].iloc[0]) / 1000.0
 

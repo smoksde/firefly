@@ -50,8 +50,8 @@ void setup() {
   motor2.linkDriver(&driver2);
 
   // Limits & Tuning for Motor 1
-  motor1.voltage_limit = 0.8;
-  motor1.voltage_sensor_align = 0.5;
+  motor1.voltage_limit = 1.0;
+  motor1.voltage_sensor_align = 1.0;
   motor1.velocity_limit = 10.0;
   motor1.controller = MotionControlType::angle;
   motor1.PID_velocity.P = 0.1;
@@ -59,8 +59,8 @@ void setup() {
   motor1.P_angle.P      = 15.0;
 
   // Limits & Tuning for Motor 2 (Mirroring Motor 1)
-  motor2.voltage_limit = 0.8;
-  motor2.voltage_sensor_align = 0.5;
+  motor2.voltage_limit = 1.0;
+  motor2.voltage_sensor_align = 1.0;
   motor2.velocity_limit = 10.0;
   motor2.controller = MotionControlType::angle;
   motor2.PID_velocity.P = 0.1;

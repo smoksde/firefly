@@ -1,7 +1,7 @@
-import os
 import glob
-import pandas as pd
+import os
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 def get_latest_csv():
@@ -13,6 +13,11 @@ def get_latest_csv():
 
 
 def main():
+    # --- DIAGNOSTIK-EINSTELLUNG ---
+    # Setze dies auf True, um die gespiegelten Werte von Motor 2 für die Grafik zu korrigieren
+    INVERT_M2_PLOT = True
+    # ------------------------------
+
     # 1. Locate the latest file
     csv_file = get_latest_csv()
     if not csv_file:
@@ -51,6 +56,15 @@ def main():
     # Relative time calculation
     df["time_s"] = (df["time_ms"] - df["time_ms"].iloc[0]) / 1000.0
 
+    # --- INVERTIERUNG FÜR MOTOR 2 ANWENDEN ---
+    if INVERT_M2_PLOT:
+        print("--> Info: Invertiere Motor 2 Werte (Target, Vel, Vq) für den Plot.")
+        # Wir invertieren die Ist-Werte und Spannungen, damit sie grafisch zum Target passen
+        df["vel2"] = -df["vel2"]
+        df["vq2"] = -df["vq2"]
+        # Falls auch das Target gespiegelt zum eigentlichen Sollwert läuft:
+        # df["v_target2"] = -df["v_target2"]
+
     # 2. Setup plotting grid (3 rows, 1 column)
     plt.rcParams["font.family"] = "sans-serif"
     fig, (ax_vel, ax_vq, ax_loop) = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
@@ -73,16 +87,23 @@ def main():
         df["time_s"], df["vel1"], color=c_m1, linewidth=1.5, label="M1 Actual Vel"
     )
 
+    # Label-Zusatz für die Legende, falls invertiert
+    m2_label_suffix = " (Inverted for Plot)" if INVERT_M2_PLOT else ""
+
     ax_vel.plot(
         df["time_s"],
         df["v_target2"],
         color=c_m2,
         linestyle="--",
         alpha=0.7,
-        label="M2 Target Vel (sp)",
+        label=f"M2 Target Vel (sp)",
     )
     ax_vel.plot(
-        df["time_s"], df["vel2"], color=c_m2, linewidth=1.5, label="M2 Actual Vel"
+        df["time_s"],
+        df["vel2"],
+        color=c_m2,
+        linewidth=1.5,
+        label=f"M2 Actual Vel{m2_label_suffix}",
     )
 
     ax_vel.set_ylabel("Velocity (Deg/s)", fontsize=10, fontweight="bold")
@@ -111,7 +132,7 @@ def main():
         color=c_m2,
         linewidth=1.5,
         alpha=0.8,
-        label="M2 Voltage (Vq)",
+        label=f"M2 Voltage (Vq){m2_label_suffix}",
     )
     ax_vq.set_ylabel("Effort (Volts)", fontsize=10, fontweight="bold")
     ax_vq.grid(True, linestyle=":", alpha=0.6)
@@ -123,7 +144,6 @@ def main():
     ax_vq.legend(loc="upper right", frameon=True, facecolor="white", edgecolor="none")
 
     # --- PANEL 3: MCU Loop Execution Time Overhead ---
-    # We calculate and display the average on the plot
     avg_loop = df["loop_us"].mean()
 
     ax_loop.plot(

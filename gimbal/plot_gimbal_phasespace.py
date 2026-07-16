@@ -1,7 +1,7 @@
-import os
 import glob
-import pandas as pd
+import os
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 def get_latest_csv():
@@ -13,6 +13,11 @@ def get_latest_csv():
 
 
 def main():
+    # --- DIAGNOSTIK-EINSTELLUNG ---
+    # Auf True setzen, um die Inversion von Motor 2 im Plot auszugleichen
+    INVERT_M2_PLOT = True
+    # ------------------------------
+
     csv_file = get_latest_csv()
     if not csv_file:
         print("Error: No 'gimbal_test_*.csv' files found.")
@@ -47,6 +52,14 @@ def main():
         df[col] = pd.to_numeric(df[col], errors="coerce")
     df = df.dropna()
 
+    # --- INVERTIERUNG VOR DER FEHLERBERECHNUNG ANWENDEN ---
+    if INVERT_M2_PLOT:
+        print(
+            "--> Info: Invertiere M2 Winkel und Geschwindigkeit zur Fehlerberechnung."
+        )
+        df["angle2"] = -df["angle2"]
+        df["vel2"] = -df["vel2"]
+
     # Calculate dynamic position error (Target - Actual)
     df["error1"] = df["target1"] - df["angle1"]
     df["error2"] = df["target2"] - df["angle2"]
@@ -56,7 +69,6 @@ def main():
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
     # --- MOTOR 1 PHASE SPACE ---
-    # Plot the trajectory line
     ax1.plot(
         df["error1"],
         df["vel1"],
@@ -65,7 +77,6 @@ def main():
         linewidth=1.5,
         label="Trajectory",
     )
-    # Scatter plot the start and end points
     ax1.scatter(
         df["error1"].iloc[0],
         df["vel1"].iloc[0],
@@ -84,7 +95,6 @@ def main():
         label="End",
     )
 
-    # Add target origin line crossings
     ax1.axhline(0, color="black", linestyle=":", alpha=0.5)
     ax1.axvline(0, color="black", linestyle=":", alpha=0.5)
 
@@ -97,6 +107,8 @@ def main():
     ax1.legend()
 
     # --- MOTOR 2 PHASE SPACE ---
+    m2_title_suffix = " (Inverted)" if INVERT_M2_PLOT else ""
+
     ax2.plot(
         df["error2"],
         df["vel2"],
@@ -127,7 +139,9 @@ def main():
     ax2.axvline(0, color="black", linestyle=":", alpha=0.5)
 
     ax2.set_title(
-        "Motor 2 Phase Portrait\n(Roll Stability)", fontsize=12, fontweight="bold"
+        f"Motor 2 Phase Portrait{m2_title_suffix}\n(Roll Stability)",
+        fontsize=12,
+        fontweight="bold",
     )
     ax2.set_xlabel("Position Error (Degrees)", fontweight="bold")
     ax2.set_ylabel("Shaft Velocity (Deg/s)", fontweight="bold")
